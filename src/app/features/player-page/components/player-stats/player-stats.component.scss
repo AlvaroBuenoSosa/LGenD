@@ -1,0 +1,23 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: #181818;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card span {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.card strong {
+  font-size: 20px;
+  color: white;
+}

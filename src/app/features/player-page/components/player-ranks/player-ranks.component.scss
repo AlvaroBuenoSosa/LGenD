@@ -1,0 +1,23 @@
+.ranks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rank-card {
+  background: #1c1f26;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.rank-card span {
+  font-size: 11px;
+  color: #888;
+}
+
+.rank-card strong {
+  font-size: 18px;
+  color: #fff;
+}

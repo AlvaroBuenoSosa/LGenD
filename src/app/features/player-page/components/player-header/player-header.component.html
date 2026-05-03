@@ -1,0 +1,17 @@
+<div class="header">
+
+  <img [src]="player.avatar || ''" class="avatar"/>
+
+  <div class="info">
+    <h1>{{ player.name }}</h1>
+
+    <div class="links">
+      <a [href]="player.profileUrl" target="_blank">Steam</a>
+    </div>
+
+    <div class="elo">
+      FACEIT ELO: <strong>{{ player.faceit.elo }}</strong>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,81 @@
+<div *ngIf="player$ | async as p; else loading" class="stats-wrapper">
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <span>K/D</span>
+      <strong>{{ p.stats.kd | number:'1.2-2' }}</strong>
+    </div>
+
+    <div class="stat-card">
+      <span>ADR</span>
+      <strong>{{ p.stats.adr }}</strong>
+    </div>
+
+    <div class="stat-card">
+      <span>Win Rate</span>
+      <strong>{{ p.stats.winRate }}%</strong>
+    </div>
+
+    <div class="stat-card">
+      <span>Matches</span>
+      <strong>{{ p.stats.matches }}</strong>
+    </div>
+
+    <div class="stat-card">
+      <span>Wins</span>
+      <strong>{{ p.stats.wins }}</strong>
+    </div>
+
+    <div class="stat-card">
+      <span>HS%</span>
+      <strong>{{ p.stats.hs }}%</strong>
+    </div>
+
+    <div class="stat-card rating">
+      <span>Rating</span>
+      <strong [ngClass]="getRatingClass(p.stats.rating)">
+        {{ p.stats.rating | number:'1.2-2' }}
+      </strong>
+    </div>
+
+  </div>
+
+  <!-- FACEIT PERFORMANCE -->
+  <div class="performance" *ngIf="p.faceitPerformance as perf">
+
+    <h3>Recent Performance</h3>
+
+    <div class="perf-grid">
+      <div><span>K/D</span><strong>{{ perf.kd }}</strong></div>
+      <div><span>Win Rate</span><strong>{{ perf.winRate }}%</strong></div>
+      <div><span>Avg Kills</span><strong>{{ perf.avgKills }}</strong></div>
+      <div><span>Avg Deaths</span><strong>{{ perf.avgDeaths }}</strong></div>
+      <div><span>Matches</span><strong>{{ perf.matches }}</strong></div>
+      <div><span>Wins</span><strong>{{ perf.wins }}</strong></div>
+      <div>
+        <span>Rating</span>
+        <strong [ngClass]="getRatingClass(perf.rating)">
+          {{ perf.rating }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="form">
+      <span *ngFor="let f of perf.form"
+        [class.win]="f === 1"
+        [class.loss]="f === 0">
+      </span>
+    </div>
+
+  </div>
+
+</div>
+
+<ng-template #loading>
+  <div class="loading">Cargando stats...</div>
+</ng-template>
+
+
+
+

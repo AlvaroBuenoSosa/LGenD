@@ -1,0 +1,20 @@
+<div class="ranks">
+
+  <h3>Player Ranks</h3>
+
+  <div class="rank-card">
+    <span>FACEIT LEVEL</span>
+    <strong>{{ player?.faceit?.level ?? 'N/A' }}</strong>
+  </div>
+
+  <div class="rank-card">
+    <span>ELO</span>
+    <strong>{{ player?.faceit?.elo ?? 'N/A' }}</strong>
+  </div>
+
+  <div class="rank-card">
+    <span>RATING</span>
+    <strong>{{ player?.faceitPerformance?.rating ?? player?.stats?.rating ?? 'N/A' }}</strong>
+  </div>
+
+</div>
