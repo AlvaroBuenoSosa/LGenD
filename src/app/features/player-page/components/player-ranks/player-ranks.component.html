@@ -1,20 +1,81 @@
 <div class="ranks">
 
-  <h3>Player Ranks</h3>
+  <h2>
+
+    Player Ranks
+
+  </h2>
+
+  <!-- FACEIT -->
 
   <div class="rank-card">
-    <span>FACEIT LEVEL</span>
-    <strong>{{ player?.faceit?.level ?? 'N/A' }}</strong>
+
+    <div class="title">
+
+      FACEIT LEVEL
+
+    </div>
+
+    <div class="value">
+
+      {{ player.faceit.level }}
+
+    </div>
+
   </div>
 
   <div class="rank-card">
-    <span>ELO</span>
-    <strong>{{ player?.faceit?.elo ?? 'N/A' }}</strong>
+
+    <div class="title">
+
+      ELO
+
+    </div>
+
+    <div class="value">
+
+      {{ player.faceit.elo }}
+
+    </div>
+
   </div>
 
   <div class="rank-card">
-    <span>RATING</span>
-    <strong>{{ player?.faceitPerformance?.rating ?? player?.stats?.rating ?? 'N/A' }}</strong>
+
+    <div class="title">
+
+      RATING
+
+    </div>
+
+    <div class="value">
+
+      {{ player.stats.rating }}
+
+    </div>
+
+  </div>
+
+  <!-- QUICK STATS -->
+
+  <div class="quick">
+
+    <h3>
+
+      Quick Stats
+
+    </h3>
+
+    <div>Matches {{ player.stats.matches }}</div>
+
+    <div>Wins {{ player.stats.wins }}</div>
+
+    <div>K/D {{ player.stats.kd }}</div>
+
+    <div>ADR {{ player.stats.adr }}</div>
+
+    <div>HS% {{ player.stats.hs }}%</div>
+
   </div>
 
 </div>

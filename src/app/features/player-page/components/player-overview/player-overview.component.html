@@ -1,0 +1,48 @@
+<div class="overview">
+
+  <!-- KD -->
+  <app-player-stat-circle
+    label="K/D"
+    [value]="player.stats.kd"
+    [displayValue]="player.stats.kd"
+    [max]="3"
+    color="#7ee787">
+  </app-player-stat-circle>
+
+  <!-- RATING -->
+  <app-player-stat-circle
+    label="RATING"
+    [value]="player.stats.rating"
+    [displayValue]="player.stats.rating"
+    [max]="2"
+    color="#7ee787">
+  </app-player-stat-circle>
+
+  <!-- WINRATE -->
+  <app-player-stat-circle
+    label="WIN RATE"
+    [value]="player.stats.winRate"
+    [displayValue]="player.stats.winRate + '%'"
+    [max]="100"
+    color="#60a5fa">
+  </app-player-stat-circle>
+
+  <!-- HS -->
+  <app-player-stat-circle
+    label="HS%"
+    [value]="player.stats.hs"
+    [displayValue]="player.stats.hs + '%'"
+    [max]="100"
+    color="#f59e0b">
+  </app-player-stat-circle>
+
+  <!-- ADR -->
+  <app-player-stat-circle
+    label="ADR"
+    [value]="player.stats.adr"
+    [displayValue]="player.stats.adr"
+    [max]="150"
+    color="#c084fc">
+  </app-player-stat-circle>
+
+</div>

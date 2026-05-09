@@ -1,0 +1,56 @@
+.circle-card {
+  position: relative;
+
+  width: 140px;
+  height: 140px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+svg {
+  width: 140px;
+  height: 140px;
+
+  transform: rotate(-90deg);
+}
+
+circle {
+  fill: none;
+  stroke-width: 10;
+}
+
+.bg {
+  stroke: rgba(255,255,255,.06);
+}
+
+.progress {
+  stroke: #77d353;
+
+  stroke-linecap: round;
+
+  transition: .4s ease;
+}
+
+.content {
+  position: absolute;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content strong {
+  font-size: 28px;
+}
+
+.content span {
+  margin-top: 4px;
+
+  font-size: 12px;
+
+  color: rgba(255,255,255,.55);
+
+  text-transform: uppercase;
+}

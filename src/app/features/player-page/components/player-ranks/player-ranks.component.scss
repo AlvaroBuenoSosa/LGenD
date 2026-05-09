@@ -1,23 +1,69 @@
 .ranks {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+
+  background: #111827;
+
+  border-radius: 18px;
+
+  padding: 24px;
+
+  color: white;
+
+}
+
+h2 {
+
+  margin-top: 0;
+
+  margin-bottom: 20px;
+
+  font-size: 26px;
+
 }
 
 .rank-card {
-  background: #1c1f26;
-  border-radius: 10px;
-  padding: 12px;
+
+  background: #1f2937;
+
+  border-radius: 12px;
+
+  padding: 16px;
+
+  margin-bottom: 14px;
+
+}
+
+.title {
+
+  color: #9ca3af;
+
+  font-size: 13px;
+
+  margin-bottom: 8px;
+
+}
+
+.value {
+
+  font-size: 34px;
+
+  font-weight: 700;
+
+}
+
+.quick {
+
+  margin-top: 30px;
+
   display: flex;
+
   flex-direction: column;
+
+  gap: 8px;
+
 }
 
-.rank-card span {
-  font-size: 11px;
-  color: #888;
-}
+.quick h3 {
 
-.rank-card strong {
-  font-size: 18px;
-  color: #fff;
+  margin-bottom: 12px;
+
 }

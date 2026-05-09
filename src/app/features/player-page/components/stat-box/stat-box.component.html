@@ -1,0 +1,19 @@
+<div class="stat-box">
+
+  <span class="label">
+    {{ label }}
+  </span>
+
+  <strong
+    class="value"
+    [style.color]="color || null">
+
+    {{ value }}
+
+  </strong>
+
+  <small *ngIf="subValue">
+    {{ subValue }}
+  </small>
+
+</div>

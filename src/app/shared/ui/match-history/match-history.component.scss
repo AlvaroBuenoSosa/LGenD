@@ -1,0 +1,19 @@
+.history {
+  display: flex;
+  gap: 8px;
+}
+
+.history span {
+  width: 16px;
+  height: 16px;
+
+  border-radius: 4px;
+}
+
+.win {
+  background: #77d353;
+}
+
+.loss {
+  background: #ff5c5c;
+}

@@ -1,17 +1,57 @@
 <div class="header">
 
-  <img [src]="player.avatar || ''" class="avatar"/>
+  <img
+    [src]="player.avatar"
+    class="avatar"
+  />
 
-  <div class="info">
-    <h1>{{ player.name }}</h1>
+  <h1>
 
-    <div class="links">
-      <a [href]="player.profileUrl" target="_blank">Steam</a>
+    {{ player.name }}
+
+  </h1>
+
+  <div class="country">
+
+    {{ player.faceit.profile.country }}
+
+  </div>
+
+  <div class="links">
+
+    <a
+      [href]="player.profileUrl"
+      target="_blank"
+    >
+      Steam
+    </a>
+
+    <a
+      *ngIf="player.faceit.profile.url"
+      [href]="player.faceit.profile.url"
+      target="_blank"
+    >
+      FACEIT
+    </a>
+
+  </div>
+
+  <div class="faceit-stats">
+
+    <div>
+
+      FACEIT ELO:
+      <strong>{{ player.faceit.elo }}</strong>
+
     </div>
 
-    <div class="elo">
-      FACEIT ELO: <strong>{{ player.faceit.elo }}</strong>
+    <div>
+
+      FACEIT LEVEL:
+      <strong>{{ player.faceit.level }}</strong>
+
     </div>
+
   </div>
 
 </div>

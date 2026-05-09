@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+
+import { HomeComponent } from './features/home/home.component';
+
 import { PlayerPageComponent } from './features/player-page/player-page.component';
 
 import { PlayerStatsComponent } from './features/player-page/components/player-stats/player-stats.component';
@@ -8,24 +11,78 @@ import { PlayerMapsComponent } from './features/player-page/components/player-ma
 import { PlayerMatchesComponent } from './features/player-page/components/player-matches/player-matches.component';
 import { PlayerTeammatesComponent } from './features/player-page/components/player-teammates/player-teammates.component';
 
-import { HomeComponent } from './features/home/home.component';
-
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
 
+  // HOME
   {
-    path: 'players/:steamId',
+    path: '',
+    component: HomeComponent
+  },
+
+  // PLAYER PAGE
+  {
+    path: 'player/:steamId',
     component: PlayerPageComponent,
+
     children: [
-      { path: '', redirectTo: 'stats', pathMatch: 'full' },
-      { path: 'stats', component: PlayerStatsComponent },
-      { path: 'graphs', component: PlayerGraphsComponent },
-      { path: 'weapons', component: PlayerWeaponsComponent },
-      { path: 'maps', component: PlayerMapsComponent },
-      { path: 'matches', component: PlayerMatchesComponent },
-      { path: 'teammates', component: PlayerTeammatesComponent }
+
+      // DEFAULT TAB
+      {
+        path: '',
+        redirectTo: 'stats',
+        pathMatch: 'full'
+      },
+
+      // STATS
+      {
+        path: 'stats',
+        component: PlayerStatsComponent
+      },
+
+      // GRAPHS
+      {
+        path: 'graphs',
+        component: PlayerGraphsComponent
+      },
+
+      // WEAPONS
+      {
+        path: 'weapons',
+        component: PlayerWeaponsComponent
+      },
+
+      // MAPS
+      {
+        path: 'maps',
+        component: PlayerMapsComponent
+      },
+
+      // MATCHES
+      {
+        path: 'matches',
+        component: PlayerMatchesComponent
+      },
+
+      // PLAYED WITH
+      {
+        path: 'teammates',
+        component: PlayerTeammatesComponent
+      }
+
     ]
   },
 
-  { path: '**', redirectTo: '' }
+  // REDIRECT OLD URLS
+  {
+    path: 'players/:steamId',
+    redirectTo: 'player/:steamId',
+    pathMatch: 'full'
+  },
+
+  // FALLBACK
+  {
+    path: '**',
+    redirectTo: ''
+  }
+
 ];

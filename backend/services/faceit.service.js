@@ -30,6 +30,8 @@ async function getFaceitPlayerBySteamId(steamId) {
     profile: player,
     stats: statsRes.data || null
   };
+
+
 }
 
 module.exports = { getFaceitPlayerBySteamId };

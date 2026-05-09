@@ -1,0 +1,23 @@
+<div class="card">
+
+  <div class="title">
+
+    {{ label }}
+
+  </div>
+
+  <div
+    class="circle"
+    [style.--percentage]="percentage + '%'"
+    [style.--color]="color"
+  >
+
+    <div class="inner">
+
+      {{ displayValue }}
+
+    </div>
+
+  </div>
+
+</div>

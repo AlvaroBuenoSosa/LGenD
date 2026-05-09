@@ -1,0 +1,36 @@
+.stat-box {
+  background: #181818;
+  border: 1px solid #232323;
+  border-radius: 10px;
+
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  transition: .15s;
+}
+
+.stat-box:hover {
+  border-color: #303030;
+  background: #1d1d1d;
+}
+
+.label {
+  color: #8b8b8b;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+}
+
+small {
+  color: #6b6b6b;
+  font-size: 12px;
+}

@@ -1,0 +1,9 @@
+<div class="history">
+
+  <span
+    *ngFor="let match of matches"
+    [class.win]="match === 1"
+    [class.loss]="match === 0">
+  </span>
+
+</div>

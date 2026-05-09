@@ -1,0 +1,73 @@
+.card {
+  background: #171d31;
+
+  border: 1px solid rgba(255,255,255,.05);
+
+  border-radius: 10px;
+
+  padding: 18px;
+
+  min-height: 110px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  transition: .2s;
+}
+
+.card:hover {
+  background: #1c2440;
+}
+
+.label {
+  color: rgba(255,255,255,.55);
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+
+  margin-bottom: 10px;
+}
+
+.value {
+  font-size: 34px;
+
+  font-weight: 800;
+
+  line-height: 1;
+}
+
+small {
+  margin-top: 8px;
+
+  color: rgba(255,255,255,.45);
+
+  font-size: 12px;
+}
+
+/* COLORS */
+
+.green {
+  color: #77d353;
+}
+
+.orange {
+  color: #ffb347;
+}
+
+.red {
+  color: #ff6b6b;
+}
+
+.blue {
+  color: #61a8ff;
+}
+
+.white {
+  color: white;
+}

@@ -1,33 +1,46 @@
-<div class="page" *ngIf="player$ | async as player; else loading">
+<div
+  class="player-page"
+  *ngIf="player$ | async as player"
+>
 
-  <!-- HEADER -->
-  <app-player-header [player]="player"></app-player-header>
+  <!-- LEFT -->
+  <div class="sidebar">
 
-  <div class="layout">
+    <app-player-header
+      [player]="player">
+    </app-player-header>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <app-player-ranks [player]="player"></app-player-ranks>
-    </div>
+    <app-player-ranks
+      [player]="player">
+    </app-player-ranks>
 
-    <!-- CONTENT -->
-    <div class="content">
-
-      <nav class="sub-nav">
-        <a routerLink="stats" routerLinkActive="active">Stats</a>
-        <a routerLink="graphs" routerLinkActive="active">Graphs</a>
-        <a routerLink="weapons" routerLinkActive="active">Weapons</a>
-        <a routerLink="maps" routerLinkActive="active">Maps</a>
-        <a routerLink="matches" routerLinkActive="active">Matches</a>
-        <a routerLink="teammates" routerLinkActive="active">Players</a>
-      </nav>
-
-      <router-outlet></router-outlet>
-
-    </div>
   </div>
-</div>
 
-<ng-template #loading>
-  <div class="loading">Loading player...</div>
-</ng-template>
+  <!-- RIGHT -->
+  <div class="content">
+
+    <app-player-navbar></app-player-navbar>
+
+    <app-player-overview
+      [player]="player">
+    </app-player-overview>
+
+    <app-player-stats
+      [player]="player">
+    </app-player-stats>
+
+    <app-player-weapons
+      [player]="player">
+    </app-player-weapons>
+
+    <app-player-maps
+      [player]="player">
+    </app-player-maps>
+
+    <app-player-matches
+      [player]="player">
+    </app-player-matches>
+
+  </div>
+
+</div>

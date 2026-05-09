@@ -1,0 +1,28 @@
+<div class="circle-card">
+
+  <svg viewBox="0 0 140 140">
+
+    <circle
+      class="bg"
+      cx="70"
+      cy="70"
+      r="52">
+    </circle>
+
+    <circle
+      class="progress"
+      cx="70"
+      cy="70"
+      r="52"
+      [style.strokeDasharray]="circumference"
+      [style.strokeDashoffset]="offset">
+    </circle>
+
+  </svg>
+
+  <div class="content">
+    <strong>{{ value }}%</strong>
+    <span>{{ label }}</span>
+  </div>
+
+</div>

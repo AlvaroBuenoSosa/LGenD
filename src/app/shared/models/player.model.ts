@@ -1,6 +1,7 @@
 export interface FaceitProfile {
   country: string;
   nickname: string;
+  url?: string;
 }
 
 export interface FaceitLifetime {

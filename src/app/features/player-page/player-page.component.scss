@@ -1,46 +1,47 @@
-.page {
-  max-width: 1400px;
+.player-page {
+
+  width: 100%;
+
+  max-width: 1700px;
+
   margin: 0 auto;
-  padding: 16px;
-  color: #fff;
+
+  padding: 20px;
+
+  display: grid;
+
+  grid-template-columns: 320px 1fr;
+
+  gap: 24px;
+
+  align-items: start;
+
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 20px;
-}
+/* LEFT */
 
 .sidebar {
-  background: #111;
-  border-radius: 10px;
-  padding: 16px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+
+  position: sticky;
+
+  top: 20px;
+
 }
+
+/* RIGHT */
 
 .content {
-  background: #111;
-  border-radius: 10px;
-  padding: 16px;
-}
 
-.sub-nav {
   display: flex;
-  gap: 16px;
-  border-bottom: 1px solid #222;
-  margin-bottom: 20px;
-}
 
-.sub-nav a {
-  cursor: pointer;
-  padding-bottom: 8px;
-  color: #aaa;
-}
+  flex-direction: column;
 
-.sub-nav a:hover {
-  color: white;
-}
+  gap: 24px;
 
-.loading {
-  text-align: center;
-  padding: 40px;
 }
