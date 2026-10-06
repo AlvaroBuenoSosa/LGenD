@@ -191,6 +191,7 @@ async function getPlayer(req, res) {
         rating:
           performance?.rating || 0
 
+
       }
 
     });
