@@ -1,6 +1,10 @@
-const { getSteamPlayer } = require('../services/steam.service');
+const {
+  getSteamPlayer
+} = require('../services/steam.service');
 const { getFaceitPlayerBySteamId } = require('../services/faceit.service');
 const { getCsStats } = require('../services/csstats.service');
+const { getFaceitWeaponStatsStatus } = require('../services/faceit-weapon-demos.service');
+const { getCsStatsGGWeaponStatsStatus } = require('../services/csstatsgg.service');
 
 async function getPlayer(req, res) {
 
@@ -10,11 +14,20 @@ async function getPlayer(req, res) {
 
     const [steam, faceit, performance] = await Promise.all([
 
-      getSteamPlayer(steamId).catch(() => null),
+      getSteamPlayer(steamId).catch(error => {
+        console.warn('Steam profile lookup failed:', error.message);
+        return null;
+      }),
 
-      getFaceitPlayerBySteamId(steamId).catch(() => null),
+      getFaceitPlayerBySteamId(steamId).catch(error => {
+        console.warn('FACEIT profile lookup failed:', error.message);
+        return null;
+      }),
 
-      getCsStats(steamId).catch(() => null)
+      getCsStats(steamId).catch(error => {
+        console.warn('FACEIT career stats lookup failed:', error.message);
+        return null;
+      })
 
     ]);
 
@@ -158,7 +171,10 @@ async function getPlayer(req, res) {
 
       faceitPerformance:
 
-        performance || {},
+        {
+          ...(performance || {}),
+          weaponStats: performance?.weaponStats || { mostKills: [], hsPercent: [] }
+        },
 
       csstats:
 
@@ -208,6 +224,35 @@ async function getPlayer(req, res) {
 
 }
 
+async function getPlayerWeaponStats(req, res) {
+  const { steamId } = req.params;
+
+  if (!/^\d{17}$/.test(steamId)) {
+    return res.status(400).json({ error: 'Invalid Steam ID' });
+  }
+
+  try {
+    return res.json(await getFaceitWeaponStatsStatus(steamId));
+  } catch (error) {
+    console.error('Failed to get FACEIT weapon analysis status:', error.message);
+    return res.status(500).json({
+      error: 'Failed to retrieve FACEIT weapon analysis status'
+    });
+  }
+}
+
+function getPlayerMatchmakingWeaponStats(req, res) {
+  const { steamId } = req.params;
+
+  if (!/^\d{17}$/.test(steamId)) {
+    return res.status(400).json({ error: 'Invalid Steam ID' });
+  }
+
+  return res.json(getCsStatsGGWeaponStatsStatus(steamId));
+}
+
 module.exports = {
-  getPlayer
+  getPlayer,
+  getPlayerWeaponStats,
+  getPlayerMatchmakingWeaponStats
 };

@@ -28,9 +28,9 @@ export interface FaceitPerformance {
   avgHsPercent: number;
   avgClutchSuccess: number;
   avgEntrySuccess: number;
-  weaponStats: unknown[];
-  mapStats: unknown[];
-  matchDetails: unknown[];
+  weaponStats: PlayerWeaponStats;
+  mapStats: PlayerMapStats[];
+  matchDetails: PlayerMatchDetail[];
 }
 
 export interface PlayerStats {
@@ -41,6 +41,62 @@ export interface PlayerStats {
   wins: number;
   hs: number;
   rating: number;
+}
+
+export interface PlayerWeaponStats {
+  mostKills: PlayerWeaponKill[];
+  hsPercent: PlayerWeaponHeadshots[];
+}
+
+export interface PlayerWeaponStatsJob {
+  status: 'processing' | 'complete' | 'partial' | 'failed';
+  startedAt: number;
+  processedMatches: number;
+  totalMatches: number | null;
+  analyzedMatches: number;
+  failedMatches: number;
+  finishedAt: number | null;
+  weaponStats: PlayerWeaponStats;
+  message: string | null;
+}
+
+export interface PlayerMatchmakingWeaponStatsJob {
+  status: 'processing' | 'complete' | 'failed';
+  startedAt: number;
+  finishedAt: number | null;
+  weaponStats: PlayerWeaponStats;
+  message: string | null;
+}
+
+export interface PlayerWeaponKill {
+  name: string;
+  imageId: string;
+  kills: number;
+}
+
+export interface PlayerWeaponHeadshots {
+  name: string;
+  imageId: string;
+  hsPercent: number;
+}
+
+export interface PlayerMapStats {
+  name: string;
+  matches: number;
+  winRate: number;
+  kd: number;
+}
+
+export interface PlayerMatchDetail {
+  date: string;
+  map: string;
+  score: string;
+  kills: number;
+  assists: number;
+  deaths: number;
+  adr: number;
+  hsPercent: number;
+  won: boolean;
 }
 
 export interface Player {

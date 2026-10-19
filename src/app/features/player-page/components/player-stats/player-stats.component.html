@@ -3,38 +3,38 @@
   <div class="stats-grid">
 
     <div class="stat-card">
-      <span>K/D</span>
+      <span>K/D </span>
       <strong>{{ player.stats.kd | number:'1.2-2' }}</strong>
     </div>
 
     <div class="stat-card">
-      <span>ADR</span>
+      <span>ADR </span>
       <strong>{{ player.stats.adr }}</strong>
     </div>
 
     <div class="stat-card">
-      <span>Win Rate</span>
+      <span>Win Rate </span>
       <strong>{{ player.stats.winRate }}%</strong>
     </div>
 
     <div class="stat-card">
-      <span>Matches</span>
+      <span>Matches  </span>
       <strong>{{ player.stats.matches }}</strong>
     </div>
 
     <div class="stat-card">
-      <span>Wins</span>
+      <span>Wins </span>
       <strong>{{ player.stats.wins }}</strong>
     </div>
 
     <div class="stat-card">
-      <span>HS%</span>
+      <span>HS% </span>
       <strong>{{ player.stats.hs }}%</strong>
     </div>
 
     <div class="stat-card rating">
 
-      <span>Rating</span>
+      <span>Rating </span>
 
       <strong [ngClass]="getRatingClass(player.stats.rating)">
         {{ player.stats.rating | number:'1.2-2' }}

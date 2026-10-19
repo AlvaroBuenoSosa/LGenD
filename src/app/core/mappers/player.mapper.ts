@@ -1,4 +1,8 @@
-import { Player } from '../../shared/models/player.model';
+import {
+  Player,
+  PlayerWeaponHeadshots,
+  PlayerWeaponKill
+} from '../../shared/models/player.model';
 
 type FaceitLifetimeRaw = Record<string, unknown>;
 
@@ -92,6 +96,36 @@ export class PlayerMapper {
       winRate: n(cs.winRate)
     };
 
+    const rawWeaponStats = perf.weaponStats;
+    const weaponStatsObject =
+      typeof rawWeaponStats === 'object' &&
+      rawWeaponStats !== null &&
+      !Array.isArray(rawWeaponStats)
+        ? rawWeaponStats as Record<string, unknown>
+        : {};
+
+    const normalizeWeaponEntries = <T>(
+      value: unknown,
+      statKey: 'kills' | 'hsPercent',
+      makeWeapon: (name: string, imageId: string, stat: number) => T
+    ): T[] => {
+      if (!Array.isArray(value)) return [];
+
+      return value.flatMap((entry: unknown) => {
+        if (typeof entry !== 'object' || entry === null) return [];
+
+        const weapon = entry as Record<string, unknown>;
+        if (typeof weapon['name'] !== 'string' || typeof weapon['imageId'] !== 'string') {
+          return [];
+        }
+
+        const stat = n(weapon[statKey]);
+        return stat > 0
+          ? [makeWeapon(weapon['name'], weapon['imageId'], stat)]
+          : [];
+      });
+    };
+
     const faceitPerformance = {
       matches: n(perf.matches),
       wins: n(perf.wins),
@@ -107,7 +141,18 @@ export class PlayerMapper {
       avgHsPercent: n(perf.avgHsPercent),
       avgClutchSuccess: n(perf.avgClutchSuccess),
       avgEntrySuccess: n(perf.avgEntrySuccess),
-      weaponStats: Array.isArray(perf.weaponStats) ? perf.weaponStats : [],
+      weaponStats: {
+        mostKills: normalizeWeaponEntries(
+          weaponStatsObject['mostKills'],
+          'kills',
+          (name, imageId, kills): PlayerWeaponKill => ({ name, imageId, kills })
+        ),
+        hsPercent: normalizeWeaponEntries(
+          weaponStatsObject['hsPercent'],
+          'hsPercent',
+          (name, imageId, hsPercent): PlayerWeaponHeadshots => ({ name, imageId, hsPercent })
+        )
+      },
       mapStats: Array.isArray(perf.mapStats) ? perf.mapStats : [],
       matchDetails: Array.isArray(perf.matchDetails) ? perf.matchDetails : []
     };

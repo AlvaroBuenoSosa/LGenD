@@ -1,0 +1,135 @@
+.weapons-card {
+  padding: 24px;
+  border: 1px solid #263244;
+  border-radius: 16px;
+  background: #111827;
+  color: #f8fafc;
+}
+
+.weapons-header {
+  margin-bottom: 24px;
+}
+
+.weapons-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.weapons-header p,
+.total-kills,
+.weapon-share > span,
+.empty-state,
+.analysis-status {
+  color: #aab6c7;
+}
+
+.weapons-header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+.weapon-section h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.weapon-sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+
+.weapon-source > h4 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.weapon-source-sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.weapon-section h5 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.weapon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.weapon-item {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #263244;
+  border-radius: 10px;
+  background: #0b1220;
+}
+
+.weapon-item img {
+  width: 80px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.weapon-item span {
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty-state {
+  margin: 24px 0 0;
+  font-size: 14px;
+}
+
+.analysis-status,
+.analysis-warning {
+  margin: 0 0 18px;
+  font-size: 14px;
+}
+
+.analysis-warning {
+  color: #fbbf24;
+}
+
+@media (max-width: 480px) {
+  .weapons-card {
+    padding: 18px;
+  }
+
+  .weapon-sections {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .weapon-source-sections {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .weapon-grid {
+    gap: 8px;
+  }
+
+  .weapon-item {
+    padding: 8px;
+  }
+
+  .weapon-item img {
+    width: 64px;
+    height: 44px;
+  }
+}

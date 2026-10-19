@@ -1,5 +1,50 @@
-<div class="card">
-  <h3>Maps</h3>
+<section class="maps-card" aria-labelledby="maps-title">
+  <header class="maps-header">
+    <div>
+      <h3 id="maps-title">Maps</h3>
+      <p>Performance by map</p>
+    </div>
 
-  <p>Coming soon: winrate per map, KD per map.</p>
-</div>
+    @if (player().faceitPerformance.mapStats.length) {
+      <span class="map-count">
+        {{ player().faceitPerformance.mapStats.length }} maps
+      </span>
+    }
+  </header>
+
+  @if (player().faceitPerformance.mapStats.length) {
+    <ol class="map-list">
+      @for (map of player().faceitPerformance.mapStats; track map.name) {
+        <li class="map-row">
+          <div class="map-heading">
+            <h4>{{ map.name }}</h4>
+            <span>{{ map.matches | number }} matches</span>
+          </div>
+
+          <div class="map-stats">
+            <div class="map-stat">
+              <span>Win rate</span>
+              <strong>{{ map.winRate | number:'1.0-1' }}%</strong>
+              <div
+                class="win-rate-track"
+                role="meter"
+                [attr.aria-label]="map.name + ' win rate'"
+                [attr.aria-valuenow]="map.winRate"
+                aria-valuemin="0"
+                aria-valuemax="100">
+                <span [style.width.%]="map.winRate"></span>
+              </div>
+            </div>
+
+            <div class="map-stat kd-stat">
+              <span>K/D</span>
+              <strong>{{ map.kd | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+        </li>
+      }
+    </ol>
+  } @else {
+    <p class="empty-state">No map statistics are available yet.</p>
+  }
+</section>

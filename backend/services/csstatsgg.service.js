@@ -1,5 +1,13 @@
 const puppeteer = require('puppeteer');
 
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const FAILURE_RETRY_DELAY_MS = 60 * 1000;
+const weaponStatsJobs = new Map();
+
+function emptyWeaponStats() {
+  return { mostKills: [], hsPercent: [] };
+}
+
 async function getCsStatsGG(steamId) {
   let browser;
   try {
@@ -23,6 +31,7 @@ async function getCsStatsGG(steamId) {
 
       // Obtener todo el texto para búsqueda robusta
       const bodyText = document.body.innerText || document.body.textContent || '';
+      const normalizedBodyText = bodyText.toLowerCase();
 
       // Función para extraer número de línea que contiene término
       const extractNumberFromText = (term) => {
@@ -79,18 +88,163 @@ async function getCsStatsGG(steamId) {
         }
       });
 
-      return stats;
+      const weaponImages = Array.from(
+        document.querySelectorAll('img[src*="/images/weapons/"]')
+      );
+
+      const readWeaponSection = (headingPattern, metricPattern) => {
+        const headings = Array.from(
+          document.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="title"], [class*="heading"]')
+        );
+        const heading = headings.find(element =>
+          headingPattern.test((element.innerText || element.textContent || '').trim())
+        );
+
+        if (!heading) {
+          return [];
+        }
+
+        let section = heading;
+        while (
+          section &&
+          !Array.from(section.querySelectorAll('img[src*="/images/weapons/"]')).length
+        ) {
+          section = section.parentElement;
+        }
+
+        if (!section) {
+          return [];
+        }
+
+        return Array.from(section.querySelectorAll('img[src*="/images/weapons/"]'))
+          .flatMap(image => {
+            const imageUrl = image.getAttribute('src') || '';
+            const imageId = imageUrl.match(/\/images\/weapons\/([^/]+)_light\.png(?:\?.*)?$/)?.[1];
+            if (!imageId) {
+              return [];
+            }
+
+            let card = image.parentElement;
+            let cardText = '';
+            while (card && card !== section.parentElement) {
+              const cardImages = card.querySelectorAll('img[src*="/images/weapons/"]');
+              const text = (card.innerText || card.textContent || '').trim();
+              if (cardImages.length === 1 && metricPattern.test(text)) {
+                cardText = text;
+                break;
+              }
+              card = card.parentElement;
+            }
+
+            if (!cardText) {
+              return [];
+            }
+
+            const metric = cardText.match(metricPattern)?.[1];
+            if (!metric) {
+              return [];
+            }
+
+            const alt = image.getAttribute('alt') || '';
+            const name = alt || imageId
+              .replace(/_light$/, '')
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, letter => letter.toUpperCase());
+            const value = Number(metric.replace(/,/g, ''));
+
+            return Number.isFinite(value)
+              ? [{ name, imageId, value }]
+              : [];
+          });
+      };
+
+      return {
+        ...stats,
+        availabilityError: /verify you're human|cloudflare needs to check your browser/.test(normalizedBodyText)
+          ? 'CSStats.gg requires a human verification check, so matchmaking stats cannot be loaded automatically.'
+          : null,
+        weaponStats: {
+          mostKills: readWeaponSection(
+            /^most\s+kills$/i,
+            /([\d,]+)(?!.*[\d,])/
+          ).map(weapon => ({
+            name: weapon.name,
+            imageId: weapon.imageId,
+            kills: weapon.value
+          })),
+          hsPercent: readWeaponSection(
+            /^(?:hs\s*%|headshots?%?)$/i,
+            /([\d.]+)\s*%/
+          ).map(weapon => ({
+            name: weapon.name,
+            imageId: weapon.imageId,
+            hsPercent: weapon.value
+          }))
+        }
+      };
     });
+
+    if (data.availabilityError) {
+      throw new Error(data.availabilityError);
+    }
+    if (!data.weaponStats.mostKills.length && !data.weaponStats.hsPercent.length) {
+      throw new Error('CSStats.gg did not expose weapon statistics for this profile.');
+    }
 
     console.log('📊 CSStats.gg scraped stats:', data);
 
     return data;
   } catch (error) {
     console.error('❌ Error scraping CSStats.gg:', error.message);
-    return null;
+    throw error;
   } finally {
     if (browser) await browser.close();
   }
 }
 
-module.exports = { getCsStatsGG };
+function startWeaponStatsAnalysis(steamId) {
+  const job = {
+    status: 'processing',
+    startedAt: Date.now(),
+    finishedAt: null,
+    weaponStats: emptyWeaponStats(),
+    message: null
+  };
+  weaponStatsJobs.set(steamId, job);
+
+  void getCsStatsGG(steamId).then(stats => {
+    job.weaponStats = stats.weaponStats;
+    job.status = 'complete';
+    job.finishedAt = Date.now();
+  }).catch(error => {
+    console.warn('Unable to load CS2 matchmaking weapon stats:', error.message);
+    job.status = 'failed';
+    job.finishedAt = Date.now();
+    job.message = error.message;
+  });
+
+  return job;
+}
+
+function getCsStatsGGWeaponStatsStatus(steamId) {
+  const activeJob = weaponStatsJobs.get(steamId);
+  if (activeJob?.status === 'processing') {
+    return { ...activeJob };
+  }
+  if (
+    activeJob?.status === 'failed' &&
+    Date.now() - activeJob.finishedAt < FAILURE_RETRY_DELAY_MS
+  ) {
+    return { ...activeJob };
+  }
+  if (
+    activeJob?.status === 'complete' &&
+    Date.now() - activeJob.finishedAt < CACHE_TTL_MS
+  ) {
+    return { ...activeJob };
+  }
+
+  return { ...startWeaponStatsAnalysis(steamId) };
+}
+
+module.exports = { getCsStatsGG, getCsStatsGGWeaponStatsStatus };

@@ -1,9 +1,153 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { map } from 'rxjs/operators';
+import { catchError, map, switchMap, takeWhile } from 'rxjs/operators';
+import { Observable, of, timer, timeout } from 'rxjs';
 
-import { Player } from '../../shared/models/player.model';
+import {
+  Player,
+  PlayerMatchDetail,
+  PlayerMapStats,
+  PlayerWeaponHeadshots,
+  PlayerWeaponKill,
+  PlayerWeaponStats,
+  PlayerWeaponStatsJob,
+  PlayerMatchmakingWeaponStatsJob
+} from '../../shared/models/player.model';
+
+function normalizeWeaponList<T>(
+  value: unknown,
+  statistic: 'kills' | 'hsPercent',
+  createWeapon: (name: string, imageId: string, value: number) => T
+): T[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((entry: unknown) => {
+    if (typeof entry !== 'object' || entry === null) {
+      return [];
+    }
+
+    const weapon = entry as Record<string, unknown>;
+    if (
+      typeof weapon['name'] !== 'string' ||
+      !weapon['name'].trim() ||
+      typeof weapon['imageId'] !== 'string' ||
+      !/^[a-z0-9_]+$/i.test(weapon['imageId'])
+    ) {
+      return [];
+    }
+
+    const toNumber = (field: unknown): number => {
+      const number = Number(field);
+      return Number.isFinite(number) ? number : 0;
+    };
+
+    const value = toNumber(weapon[statistic]);
+    if (value <= 0) {
+      return [];
+    }
+
+    return [createWeapon(weapon['name'], weapon['imageId'], value)];
+  });
+}
+
+function normalizeWeaponStats(value: unknown): PlayerWeaponStats {
+  if (Array.isArray(value)) {
+    const legacy = normalizeWeaponList(
+      value,
+      'kills',
+      (name, imageId, kills): PlayerWeaponKill => ({ name, imageId, kills })
+    );
+    return { mostKills: legacy, hsPercent: [] };
+  }
+
+  if (typeof value !== 'object' || value === null) {
+    return { mostKills: [], hsPercent: [] };
+  }
+
+  const weaponStats = value as Record<string, unknown>;
+  return {
+    mostKills: normalizeWeaponList(
+      weaponStats['mostKills'],
+      'kills',
+      (name, imageId, kills): PlayerWeaponKill => ({ name, imageId, kills })
+    ),
+    hsPercent: normalizeWeaponList(
+      weaponStats['hsPercent'],
+      'hsPercent',
+      (name, imageId, hsPercent): PlayerWeaponHeadshots => ({ name, imageId, hsPercent })
+    )
+  };
+}
+
+function normalizeMapStats(value: unknown): PlayerMapStats[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((entry: unknown) => {
+    if (typeof entry !== 'object' || entry === null) {
+      return [];
+    }
+
+    const map = entry as Record<string, unknown>;
+    if (typeof map['name'] !== 'string' || !map['name'].trim()) {
+      return [];
+    }
+
+    const toNumber = (field: unknown): number => {
+      const number = Number(field);
+      return Number.isFinite(number) ? number : 0;
+    };
+
+    return [{
+      name: map['name'],
+      matches: toNumber(map['matches']),
+      winRate: toNumber(map['winRate']),
+      kd: toNumber(map['kd'])
+    }];
+  });
+}
+
+function normalizeMatchDetails(value: unknown): PlayerMatchDetail[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((entry: unknown) => {
+    if (typeof entry !== 'object' || entry === null) {
+      return [];
+    }
+
+    const match = entry as Record<string, unknown>;
+    if (typeof match['map'] !== 'string' || !match['map'].trim()) {
+      return [];
+    }
+
+    const toNumber = (field: unknown): number => {
+      const number = Number(field);
+      return Number.isFinite(number) ? number : 0;
+    };
+    const rawDate = match['date'];
+    const date = rawDate instanceof Date
+      ? rawDate.toISOString()
+      : typeof rawDate === 'string' || typeof rawDate === 'number'
+        ? String(rawDate)
+        : '';
+
+    return [{
+      date,
+      map: match['map'],
+      score: typeof match['score'] === 'string' ? match['score'] : 'N/A',
+      kills: toNumber(match['kills']),
+      assists: toNumber(match['assists']),
+      deaths: toNumber(match['deaths']),
+      adr: toNumber(match['adr']),
+      hsPercent: toNumber(match['hsPercent']),
+      won: match['won'] === true
+    }];
+  });
+}
 
 @Injectable({
   providedIn: 'root'
@@ -188,13 +332,13 @@ export class PlayerService {
                 perf.avgEntrySuccess || 0,
 
               weaponStats:
-                perf.weaponStats || [],
+                normalizeWeaponStats(perf.weaponStats),
 
               mapStats:
-                perf.mapStats || [],
+                normalizeMapStats(perf.mapStats),
 
               matchDetails:
-                perf.matchDetails || []
+                normalizeMatchDetails(perf.matchDetails)
 
             },
 
@@ -252,6 +396,70 @@ export class PlayerService {
 
       );
 
+  }
+
+  watchWeaponStats(steamId: string): Observable<PlayerWeaponStatsJob> {
+    return timer(0, 2500).pipe(
+      switchMap(() =>
+        this.http.get<PlayerWeaponStatsJob>(`/api/player/${steamId}/weapons`).pipe(
+          timeout({ first: 20000 })
+        )
+      ),
+      catchError((error: unknown) => {
+        const message = error instanceof HttpErrorResponse
+          ? error.status === 0
+            ? 'Cannot connect to the backend. Make sure the backend server is running.'
+            : error.status === 404
+              ? 'The Weapons API route was not found. Restart the backend server to load the latest routes.'
+              : `The Weapons API request failed (HTTP ${error.status}).`
+          : error instanceof Error && error.name === 'TimeoutError'
+            ? 'The backend did not respond within 20 seconds. Check that the backend server is running and reachable.'
+            : 'Unable to retrieve weapon analysis status.';
+        const now = Date.now();
+
+        return of({
+          status: 'failed',
+          startedAt: now,
+          processedMatches: 0,
+          totalMatches: null,
+          analyzedMatches: 0,
+          failedMatches: 0,
+          finishedAt: now,
+          weaponStats: { mostKills: [], hsPercent: [] },
+          message
+        } satisfies PlayerWeaponStatsJob);
+      }),
+      takeWhile(job => job.status === 'processing', true)
+    );
+  }
+
+  watchMatchmakingWeaponStats(steamId: string): Observable<PlayerMatchmakingWeaponStatsJob> {
+    return timer(0, 2500).pipe(
+      switchMap(() =>
+        this.http.get<PlayerMatchmakingWeaponStatsJob>(
+          `/api/player/${steamId}/weapons/matchmaking`
+        ).pipe(timeout({ first: 20000 }))
+      ),
+      catchError((error: unknown) => {
+        const message = error instanceof HttpErrorResponse
+          ? error.status === 0
+            ? 'Cannot connect to the backend. Make sure the backend server is running.'
+            : `The CS2 matchmaking stats request failed (HTTP ${error.status}).`
+          : error instanceof Error && error.name === 'TimeoutError'
+            ? 'The CS2 matchmaking stats request timed out.'
+            : 'Unable to retrieve CS2 matchmaking weapon stats.';
+        const now = Date.now();
+
+        return of({
+          status: 'failed',
+          startedAt: now,
+          finishedAt: now,
+          weaponStats: { mostKills: [], hsPercent: [] },
+          message
+        } satisfies PlayerMatchmakingWeaponStatsJob);
+      }),
+      takeWhile(job => job.status === 'processing', true)
+    );
   }
 
 }

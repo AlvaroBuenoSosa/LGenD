@@ -40,6 +40,109 @@ function normalizeMapName(map) {
     .replace(/\b\w/g, l => l.toUpperCase());
 }
 
+const weaponAliases = new Map([
+  ['ak47', 'AK-47'],
+  ['aug', 'AUG'],
+  ['awp', 'AWP'],
+  ['bizon', 'PP-Bizon'],
+  ['cz75auto', 'CZ75-Auto'],
+  ['deagle', 'Desert Eagle'],
+  ['dualberettas', 'Dual Berettas'],
+  ['elite', 'Dual Berettas'],
+  ['famas', 'FAMAS'],
+  ['fiveseven', 'Five-SeveN'],
+  ['g3sg1', 'G3SG1'],
+  ['galil', 'Galil AR'],
+  ['galilar', 'Galil AR'],
+  ['glock', 'Glock-18'],
+  ['glock18', 'Glock-18'],
+  ['m249', 'M249'],
+  ['m4a1', 'M4A1-S'],
+  ['m4a1s', 'M4A1-S'],
+  ['m4a4', 'M4A4'],
+  ['mac10', 'MAC-10'],
+  ['mag7', 'MAG-7'],
+  ['mp5sd', 'MP5-SD'],
+  ['mp7', 'MP7'],
+  ['mp9', 'MP9'],
+  ['negev', 'Negev'],
+  ['nova', 'Nova'],
+  ['p2000', 'P2000'],
+  ['p250', 'P250'],
+  ['p90', 'P90'],
+  ['revolver', 'R8 Revolver'],
+  ['sawedoff', 'Sawed-Off'],
+  ['scar20', 'SCAR-20'],
+  ['sg553', 'SG 553'],
+  ['ssg08', 'SSG 08'],
+  ['taser', 'Zeus x27'],
+  ['tec9', 'Tec-9'],
+  ['ump45', 'UMP-45'],
+  ['usp', 'USP-S'],
+  ['usps', 'USP-S'],
+  ['xm1014', 'XM1014'],
+  ['zeus', 'Zeus x27']
+]);
+
+function parseWeaponKills(value) {
+  let weaponKills = value;
+
+  if (typeof weaponKills === 'string') {
+    try {
+      weaponKills = JSON.parse(weaponKills);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        console.warn('Invalid FACEIT weapon kills JSON');
+        return [];
+      }
+
+      throw error;
+    }
+  }
+
+  if (Array.isArray(weaponKills)) {
+    return weaponKills
+      .filter(weapon => weapon && typeof weapon === 'object' && typeof weapon.name === 'string')
+      .map(weapon => [weapon.name, n(weapon.kills)])
+      .filter(([, kills]) => kills > 0);
+  }
+
+  if (weaponKills && typeof weaponKills === 'object') {
+    return Object.entries(weaponKills)
+      .map(([name, stats]) => [
+        name,
+        n(stats && typeof stats === 'object' ? stats.kills : stats)
+      ])
+      .filter(([, kills]) => kills > 0);
+  }
+
+  return [];
+}
+
+function getWeaponKills(playerStats) {
+  const entries = Object.entries(playerStats || {});
+  const weaponKillsEntry = entries.find(([name]) =>
+    name.toLowerCase().replace(/[\s_-]/g, '') === 'weaponkills'
+  );
+
+  if (weaponKillsEntry) {
+    return parseWeaponKills(weaponKillsEntry[1]);
+  }
+
+  return entries.flatMap(([statName, value]) => {
+    const normalizedStatName = statName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const weapon = [...weaponAliases.entries()]
+      .find(([alias]) =>
+        normalizedStatName === alias ||
+        (normalizedStatName.includes('kill') && normalizedStatName.includes(alias))
+      );
+
+    const kills = n(value);
+    return weapon && kills > 0 ? [[weapon[1], kills]] : [];
+  });
+}
+
 // ======================
 // MAIN FUNCTION
 // ======================
@@ -111,6 +214,7 @@ async function getCsStats(steamId) {
   const form = [];
 
   const weaponStats = {};
+  let lastPlayerStatsKeys = [];
   const mapStats = {};
 
   const matchDetails = [];
@@ -169,6 +273,7 @@ async function getCsStats(steamId) {
 
           // DEBUG
           console.log('📄 RAW PLAYER STATS:', p.player_stats);
+          lastPlayerStatsKeys = Object.keys(p.player_stats || {});
 
           // ======================
           // PLAYER STATS
@@ -224,15 +329,13 @@ async function getCsStats(steamId) {
           // WEAPON STATS
           // ======================
 
-          if (p.player_stats?.['Weapon Kills']) {
-
-            const weaponKills = p.player_stats['Weapon Kills'];
-
-            for (const [weapon, wKills] of Object.entries(weaponKills)) {
-
-              weaponStats[weapon] =
-                (weaponStats[weapon] || 0) + n(wKills);
+          for (const [weapon, wKills] of getWeaponKills(p.player_stats)) {
+            if (typeof weapon !== 'string' || !weapon.trim()) {
+              continue;
             }
+
+            weaponStats[weapon] =
+              (weaponStats[weapon] || 0) + n(wKills);
           }
 
           // ======================
@@ -390,6 +493,13 @@ async function getCsStats(steamId) {
       totalDamage: 0
     }))
     .sort((a, b) => b.kills - a.kills);
+
+  if (weaponStatsArray.length === 0 && processedMatches > 0) {
+    console.warn(
+      'FACEIT returned no per-weapon kill stats. Available player stat fields:',
+      lastPlayerStatsKeys
+    );
+  }
 
   // ======================
   // MAP ARRAY

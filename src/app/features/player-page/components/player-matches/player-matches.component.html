@@ -1,5 +1,43 @@
 <div class="card">
-  <h3>Recent Matches</h3>
+  <header class="matches-header">
+    <div>
+      <h3>Recent Matches</h3>
+      <p>Last 5 matches played</p>
+    </div>
+    @if (recentMatches().length) {
+      <span class="match-count">{{ recentMatches().length }} matches</span>
+    }
+  </header>
 
-  <p>Coming soon: match history table.</p>
+  @if (recentMatches().length) {
+    <ol class="match-list">
+      @for (match of recentMatches(); track match.date + match.map + $index) {
+        <li class="match-row">
+          <div class="match-result" [class.win]="match.won" [class.loss]="!match.won">
+            <span>{{ match.won ? 'WIN' : 'LOSS' }}</span>
+            <strong>{{ match.score }}</strong>
+          </div>
+
+          <div class="match-map">
+            <h4>{{ match.map }}</h4>
+            @if (match.date) {
+              <time [attr.datetime]="match.date">{{ match.date | date:'medium' }}</time>
+            } @else {
+              <span>Date unavailable</span>
+            }
+          </div>
+
+          <div class="match-stats" [attr.aria-label]="'Stats on ' + match.map">
+            <span><strong>{{ match.kills }}</strong> K</span>
+            <span><strong>{{ match.deaths }}</strong> D</span>
+            <span><strong>{{ match.assists }}</strong> A</span>
+            <span><strong>{{ match.adr | number:'1.0-1' }}</strong> ADR</span>
+            <span><strong>{{ match.hsPercent | number:'1.0-1' }}%</strong> HS</span>
+          </div>
+        </li>
+      }
+    </ol>
+  } @else {
+    <p class="empty-state">No recent match details are available yet.</p>
+  }
 </div>

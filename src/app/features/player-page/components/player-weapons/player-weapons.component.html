@@ -1,5 +1,148 @@
-<div class="card">
-  <h3>Weapons</h3>
+<section class="weapons-card" aria-labelledby="weapons-title">
+  <header class="weapons-header">
+    <div>
+      <h3 id="weapons-title">Weapons</h3>
+      <p>Career weapon stats from FACEIT and CS2 matchmaking</p>
+    </div>
+  </header>
 
-  <p>Coming soon: weapon usage, accuracy, kills per weapon.</p>
-</div>
+  @if (job()?.status === 'processing') {
+    <p class="analysis-status" role="status" aria-live="polite">
+      @if (job()?.totalMatches === null) {
+        Loading your FACEIT match history…
+      } @else {
+        Analyzing FACEIT demos:
+        {{ job()?.processedMatches | number }} of
+        {{ job()?.totalMatches | number }} matches processed
+      }
+    </p>
+  }
+
+  @if (job()?.status === 'partial') {
+    <p class="analysis-warning" role="status">
+      {{ job()?.message }}
+      The statistics below include {{ job()?.analyzedMatches | number }} matches.
+    </p>
+  }
+
+  @if (job()?.status === 'failed') {
+    <p class="analysis-warning" role="alert">
+      {{ job()?.message }}
+      @if (job()?.totalMatches) {
+        {{ job()?.processedMatches | number }} of
+        {{ job()?.totalMatches | number }} matches were processed;
+        {{ job()?.failedMatches | number }} demos failed.
+      }
+    </p>
+  }
+
+  <div class="weapon-sections">
+    <section class="weapon-source" aria-labelledby="faceit-weapons-title">
+      <h4 id="faceit-weapons-title">FACEIT</h4>
+      <div class="weapon-source-sections">
+        <section class="weapon-section" aria-labelledby="faceit-most-kills-title">
+          <h5 id="faceit-most-kills-title">Most Kills</h5>
+          @if (mostKills().length) {
+            <ol class="weapon-grid">
+              @for (weapon of mostKills(); track weapon.imageId) {
+                <li class="weapon-item">
+                  <img
+                    [ngSrc]="'https://static.csstats.gg/images/weapons/' + weapon.imageId + '_light.png'"
+                    [alt]="weapon.name"
+                    width="80"
+                    height="54">
+                  <span>{{ weapon.kills | number }}</span>
+                </li>
+              }
+            </ol>
+          } @else {
+            @if (job()?.status === 'complete' || job()?.status === 'partial') {
+              <p class="empty-state">No kill totals found in the analyzed demos.</p>
+            } @else if (job()?.status === 'processing') {
+              <p class="empty-state">Waiting for demo analysis…</p>
+            } @else if (job()?.status !== 'failed') {
+              <p class="empty-state">Starting demo analysis…</p>
+            }
+          }
+        </section>
+
+        <section class="weapon-section" aria-labelledby="faceit-weapon-hs-title">
+          <h5 id="faceit-weapon-hs-title">HS%</h5>
+          @if (highestHeadshotRates().length) {
+            <ol class="weapon-grid">
+              @for (weapon of highestHeadshotRates(); track weapon.imageId) {
+                <li class="weapon-item">
+                  <img
+                    [ngSrc]="'https://static.csstats.gg/images/weapons/' + weapon.imageId + '_light.png'"
+                    [alt]="weapon.name"
+                    width="80"
+                    height="54">
+                  <span>{{ weapon.hsPercent | number:'1.0-1' }}%</span>
+                </li>
+              }
+            </ol>
+          } @else {
+            @if (job()?.status === 'complete' || job()?.status === 'partial') {
+              <p class="empty-state">No headshot totals found in the analyzed demos.</p>
+            } @else if (job()?.status === 'processing') {
+              <p class="empty-state">Waiting for demo analysis…</p>
+            } @else if (job()?.status !== 'failed') {
+              <p class="empty-state">Starting demo analysis…</p>
+            }
+          }
+        </section>
+      </div>
+    </section>
+
+    <section class="weapon-source" aria-labelledby="matchmaking-weapons-title">
+      <h4 id="matchmaking-weapons-title">CS2 Matchmaking (CSStats.gg)</h4>
+      @if (matchmakingJob()?.status === 'processing') {
+        <p class="analysis-status" role="status">Loading matchmaking stats from CSStats.gg…</p>
+      } @else if (matchmakingJob()?.status === 'failed') {
+        <p class="analysis-warning" role="alert">{{ matchmakingJob()?.message }}</p>
+      } @else {
+        <div class="weapon-source-sections">
+          <section class="weapon-section" aria-labelledby="matchmaking-most-kills-title">
+            <h5 id="matchmaking-most-kills-title">Most Kills</h5>
+            @if (matchmakingMostKills().length) {
+              <ol class="weapon-grid">
+                @for (weapon of matchmakingMostKills(); track weapon.imageId) {
+                  <li class="weapon-item">
+                    <img
+                      [ngSrc]="'https://static.csstats.gg/images/weapons/' + weapon.imageId + '_light.png'"
+                      [alt]="weapon.name"
+                      width="80"
+                      height="54">
+                    <span>{{ weapon.kills | number }}</span>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="empty-state">No matchmaking kill totals found.</p>
+            }
+          </section>
+
+          <section class="weapon-section" aria-labelledby="matchmaking-weapon-hs-title">
+            <h5 id="matchmaking-weapon-hs-title">HS%</h5>
+            @if (matchmakingHighestHeadshotRates().length) {
+              <ol class="weapon-grid">
+                @for (weapon of matchmakingHighestHeadshotRates(); track weapon.imageId) {
+                  <li class="weapon-item">
+                    <img
+                      [ngSrc]="'https://static.csstats.gg/images/weapons/' + weapon.imageId + '_light.png'"
+                      [alt]="weapon.name"
+                      width="80"
+                      height="54">
+                    <span>{{ weapon.hsPercent | number:'1.0-1' }}%</span>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="empty-state">No matchmaking headshot totals found.</p>
+            }
+          </section>
+        </div>
+      }
+    </section>
+  </div>
+</section>
